@@ -2,5 +2,5 @@
 Icon = "Icon.png"
 Name = "Hertz Hunter USB Client"
 ID = "com.hertz-hunter-usb-client.odddollar"
-Version = "0.3.0"
-Build = 4
+Version = "0.4.0"
+Build = 7

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"math"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -40,11 +39,10 @@ type RssiGraph struct {
 	graphWidth  int
 	graphHeight int
 
-	// Run time relevant state
-	tooltipVisible bool
-	rssiValues     []int
-	minFrequency   int
-	maxFrequency   int
+	// Calculate tooltip data
+	rssiValues   []int
+	minFrequency int
+	maxFrequency int
 }
 
 // Creates new RssiGraph widget
@@ -67,12 +65,11 @@ func NewRssiGraph(graphWidth, graphHeight int) *RssiGraph {
 
 	// Create new object
 	graph := &RssiGraph{
-		graphCanvas:    graphCanvas,
-		tooltipBg:      tooltipBg,
-		tooltipText:    tooltipText,
-		tooltipVisible: false,
-		graphWidth:     graphWidth,
-		graphHeight:    graphHeight,
+		graphCanvas: graphCanvas,
+		tooltipBg:   tooltipBg,
+		tooltipText: tooltipText,
+		graphWidth:  graphWidth,
+		graphHeight: graphHeight,
 	}
 
 	// Extend base widget and return
@@ -92,27 +89,33 @@ func (r *RssiGraph) MouseMoved(event *desktop.MouseEvent) {
 
 // Hides tooltip when mouse leaves widget
 func (r *RssiGraph) MouseOut() {
-	r.tooltipVisible = false
 	r.tooltipBg.Hide()
 	r.tooltipText.Hide()
 	r.Refresh()
 }
 
 // Updates graph image
-func (r *RssiGraph) UpdateGraph(numbers []int, minCalibration, maxCalibration int, minFrequency, maxFrequency int) {
+func (r *RssiGraph) UpdateGraph(
+	numbers []int,
+	minCalibration, maxCalibration int,
+	minFrequency, maxFrequency int,
+) {
 	if len(numbers) == 0 {
 		return
 	}
 
 	// Used for calculating tooltip text
+	// Updated every time data polled from device
 	r.rssiValues = numbers
 	r.minFrequency = minFrequency
 	r.maxFrequency = maxFrequency
 
-	// Create blank image and calculate values
+	// Calculation values
+	barCount := len(numbers)
+	calibrationRange := maxCalibration - minCalibration
+
+	// Create blank image
 	img := newEmptyImage(r.graphWidth, r.graphHeight, color.Black)
-	barWidth := float64(r.graphWidth) / float64(len(numbers))
-	valueRange := float64(maxCalibration - minCalibration)
 
 	for i, value := range numbers {
 		// Clamp value to range
@@ -123,12 +126,12 @@ func (r *RssiGraph) UpdateGraph(numbers []int, minCalibration, maxCalibration in
 			value = maxCalibration
 		}
 
-		// Normalise value
-		normalised := float64(value-minCalibration) / valueRange
-		barHeight := int(normalised * float64(r.graphHeight))
+		// Height as percentage of calibration range
+		barHeight := (value - minCalibration) * r.graphHeight / calibrationRange
 
-		x1 := int(float64(i) * barWidth)
-		x2 := int(float64(i+1) * barWidth)
+		// Dimensions and position of bar
+		x1 := i * r.graphWidth / barCount
+		x2 := (i + 1) * r.graphWidth / barCount
 		y1 := r.graphHeight - barHeight
 
 		// Draw bar
@@ -151,49 +154,28 @@ func (r *RssiGraph) updateTooltip(localPos fyne.Position) {
 		return
 	}
 
-	// Check if mouse within graph bounds
-	insideX := localPos.X >= 0 && localPos.X < drawSize.Width
-	insideY := localPos.Y >= 0 && localPos.Y < drawSize.Height
-	if !insideX || !insideY {
-		if r.tooltipVisible {
-			r.tooltipVisible = false
-			r.tooltipBg.Hide()
-			r.tooltipText.Hide()
-			r.Refresh()
-		}
-		return
-	}
-
 	// Calculate number of bars over from 0
 	barCount := len(r.rssiValues)
 	displayWidth := int(drawSize.Width)
 	mouseX := int(localPos.X)
+	if mouseX == displayWidth {
+		mouseX--
+	}
 	barsOver := (mouseX * barCount) / displayWidth
 
-	// Calculate hovered frequency
-	step := float64(r.maxFrequency-r.minFrequency) / float64(len(r.rssiValues)-1)
-	frequency := int(math.Round(step*float64(barsOver) + float64(r.minFrequency)))
+	// Calculate frequency with integer rounding
+	freqRange := r.maxFrequency - r.minFrequency
+	denom := barCount - 1
+	num := barsOver * freqRange
+	frequency := (num+denom/2)/denom + r.minFrequency
 
+	// Format tooltip text
+	textChanged := false
 	tooltipText := fmt.Sprintf("%dMHz", frequency)
 	if r.tooltipText.Text != tooltipText {
 		r.tooltipText.Text = tooltipText
-		r.Refresh()
+		textChanged = true
 	}
-
-	// Displays mouse coordinates
-	// Will be updated later
-	// bounds := r.graphCanvas.Image.Bounds()
-	// relX := localPos.X / drawSize.Width
-	// relY := localPos.Y / drawSize.Height
-	// x := int(math.Floor(float64(relX * float32(bounds.Dx()))))
-	// y := int(math.Floor(float64(relY * float32(bounds.Dy()))))
-	// x = min(max(x, 0), bounds.Dx()-1)
-	// y = min(max(y, 0), bounds.Dy()-1)
-	// tooltipText := fmt.Sprintf("x: %d, y: %d", x, y)
-	// if r.tooltipText.Text != tooltipText {
-	// 	r.tooltipText.Text = tooltipText
-	// 	r.Refresh()
-	// }
 
 	// Get proper tooltip sizing
 	padding := float32(6)
@@ -221,12 +203,11 @@ func (r *RssiGraph) updateTooltip(localPos fyne.Position) {
 	r.tooltipText.Move(fyne.NewPos(tx+padding, ty+padding))
 
 	// Show tooltip
-	if !r.tooltipVisible {
-		r.tooltipVisible = true
-		r.tooltipBg.Show()
-		r.tooltipText.Show()
+	r.tooltipBg.Show()
+	r.tooltipText.Show()
+	if textChanged {
+		r.Refresh()
 	}
-	r.Refresh()
 }
 
 // Returns new renderer for RssiGraph

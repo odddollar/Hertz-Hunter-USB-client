@@ -3,7 +3,6 @@ package ui
 import (
 	"Hertz-Hunter-USB-Client/schema"
 	"errors"
-	"fmt"
 
 	"fyne.io/fyne/v2"
 )
@@ -69,7 +68,11 @@ func (u *Ui) connectUSBSerial() {
 	u.updateCalibrationEntries()
 
 	// Get battery voltage
-	fmt.Println(u.schema.GetBatteryVoltage())
+	_, err = u.schema.GetBatteryVoltage()
+	if err != nil {
+		u.connectionError(err)
+		return
+	}
 
 	// Start polling for values
 	valuesCh, errCh := u.schema.StartPollValues(pollRate)

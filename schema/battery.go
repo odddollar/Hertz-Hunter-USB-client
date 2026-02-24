@@ -1,6 +1,8 @@
 package schema
 
-import "Hertz-Hunter-USB-Client/usb"
+import (
+	"Hertz-Hunter-USB-Client/usb"
+)
 
 // Get calibrated values
 func (s *Schema) GetBatteryVoltage() (float64, error) {

@@ -1,12 +1,13 @@
 package ui
 
 import (
+	"Hertz-Hunter-USB-Client/widgets"
 	"net/url"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	dialog_x "fyne.io/x/fyne/dialog"
 )
 
 // Use Fyne-X extensions to create about window
@@ -23,9 +24,12 @@ func (u *Ui) showAbout() {
 	// Markdown program description
 	content := "USB serial client for the **Hertz Hunter** spectrum analyser"
 
+	battery := binding.NewFloat()
+	battery.Set(4.2)
+
 	// Use Fyne-X's about dialog
-	d := dialog_x.NewAbout(content, links, u.a, u.w)
-	d.Resize(fyne.NewSize(0, 402)) // 0 width as will always be at least content's min-width
+	d := widgets.NewAbout(content, links, battery, u.a, u.w)
+	d.Resize(fyne.NewSize(0, 424)) // 0 width as will always be at least content's min-width
 	d.Show()
 }
 

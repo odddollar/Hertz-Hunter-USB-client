@@ -7,7 +7,7 @@ import (
 )
 
 // Start polling for rssi values from device
-func (s *Schema) StartPollValues(period time.Duration) (<-chan ValuesResult, <-chan error) {
+func (s *Schema) StartPollValues(period time.Duration, pollBattery bool) (<-chan ValuesResult, <-chan error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	s.pollingCancel = cancel
 
@@ -32,6 +32,16 @@ func (s *Schema) StartPollValues(period time.Duration) (<-chan ValuesResult, <-c
 					return
 				}
 
+				// Get battery voltage
+				var batteryVoltage float64
+				if pollBattery {
+					batteryVoltage, err = s.GetBatteryVoltage()
+					if err != nil {
+						errCh <- err
+						return
+					}
+				}
+
 				// Convert data to proper type
 				raw, _ := data.Payload["values"].([]any)
 				values := make([]int, len(raw))
@@ -49,10 +59,11 @@ func (s *Schema) StartPollValues(period time.Duration) (<-chan ValuesResult, <-c
 
 				// Send data over channel
 				valuesCh <- ValuesResult{
-					Values:       values,
-					Lowband:      lowband,
-					MinFrequency: int(minFrequency),
-					MaxFrequency: int(maxFrequency),
+					Values:         values,
+					Lowband:        lowband,
+					MinFrequency:   int(minFrequency),
+					MaxFrequency:   int(maxFrequency),
+					BatteryVoltage: batteryVoltage,
 				}
 			case <-ctx.Done():
 				return

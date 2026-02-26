@@ -3,7 +3,6 @@ package ui
 import (
 	"Hertz-Hunter-USB-Client/schema"
 	"errors"
-	"time"
 
 	"fyne.io/fyne/v2"
 )
@@ -56,16 +55,6 @@ func (u *Ui) connectUSBSerial() {
 	}
 	u.batteryVoltage.Set(voltage)
 
-	go func() {
-		t := time.NewTicker(500 * time.Millisecond)
-		defer t.Stop()
-		count := 0.0
-		for range t.C {
-			u.batteryVoltage.Set(count)
-			count += 0.1
-		}
-	}()
-
 	// Set to high band
 	err = u.schema.SetBand(false)
 	if err != nil {
@@ -73,13 +62,13 @@ func (u *Ui) connectUSBSerial() {
 		return
 	}
 
-	// Get settings values
-	scan_interval_index, buzzer_index, battery_alarm_index, err := u.schema.GetSettingsIndices()
-	if err != nil {
-		u.connectionError(err)
-		return
-	}
-	u.updateSettingsIndices(scan_interval_index, buzzer_index, battery_alarm_index)
+	// // Get settings values
+	// scan_interval_index, buzzer_index, battery_alarm_index, err := u.schema.GetSettingsIndices()
+	// if err != nil {
+	// 	u.connectionError(err)
+	// 	return
+	// }
+	// u.updateSettingsIndices(scan_interval_index, buzzer_index, battery_alarm_index)
 
 	// Get calibration values
 	u.lowRssiCalibration, u.highRssiCalibration, err = u.schema.GetCalibratedValues()
@@ -92,7 +81,7 @@ func (u *Ui) connectUSBSerial() {
 	u.updateCalibrationEntries()
 
 	// Start polling for values
-	valuesCh, errCh := u.schema.StartPollValues(pollRate)
+	valuesCh, errCh := u.schema.StartPollValues(pollRate, u.batteryEnabled)
 
 	go func() {
 		for {
@@ -114,6 +103,9 @@ func (u *Ui) connectUSBSerial() {
 
 					// Automatically switch band labels
 					u.switchBandLabels(values.Lowband)
+
+					// Update battery voltage
+					u.batteryVoltage.Set(values.BatteryVoltage)
 				})
 
 			case err, ok := <-errCh: // Handle errors

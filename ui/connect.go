@@ -39,9 +39,6 @@ func (u *Ui) connectUSBSerial() {
 	// Switch which connection button is visible
 	u.showDisconnectButton()
 
-	// Enable settings ui
-	u.enableSettingsUi()
-
 	// Get battery enabled state and voltage
 	u.batteryEnabled = true
 	voltage, err := u.schema.GetBatteryVoltage()
@@ -55,6 +52,10 @@ func (u *Ui) connectUSBSerial() {
 	}
 	u.batteryVoltage.Set(voltage)
 
+	// Enable settings ui
+	// Battery alarm setting is disabled if necessary
+	u.enableSettingsUi()
+
 	// Set to high band
 	err = u.schema.SetBand(false)
 	if err != nil {
@@ -62,13 +63,13 @@ func (u *Ui) connectUSBSerial() {
 		return
 	}
 
-	// // Get settings values
-	// scan_interval_index, buzzer_index, battery_alarm_index, err := u.schema.GetSettingsIndices()
-	// if err != nil {
-	// 	u.connectionError(err)
-	// 	return
-	// }
-	// u.updateSettingsIndices(scan_interval_index, buzzer_index, battery_alarm_index)
+	// Get settings values
+	scan_interval_index, buzzer_index, battery_alarm_index, err := u.schema.GetSettingsIndices(u.batteryEnabled)
+	if err != nil {
+		u.connectionError(err)
+		return
+	}
+	u.updateSettingsIndices(scan_interval_index, buzzer_index, battery_alarm_index)
 
 	// Get calibration values
 	u.lowRssiCalibration, u.highRssiCalibration, err = u.schema.GetCalibratedValues()

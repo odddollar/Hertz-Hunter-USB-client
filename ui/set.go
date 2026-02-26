@@ -12,7 +12,7 @@ func (u *Ui) setSettingsIndices() {
 	battery_alarm_index := u.batteryAlarmSelect.SelectedIndex()
 
 	// Set indices
-	err := u.schema.SetSettingsIndices(scan_interval_index, buzzer_index, battery_alarm_index)
+	err := u.schema.SetSettingsIndices(scan_interval_index, buzzer_index, battery_alarm_index, u.batteryEnabled)
 	if err != nil {
 		u.showError(err)
 		return

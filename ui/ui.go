@@ -269,7 +269,9 @@ func (u *Ui) enableSettingsUi() {
 	fyne.Do(func() {
 		u.scanIntervalSelect.Enable()
 		u.buzzerSelect.Enable()
-		u.batteryAlarmSelect.Enable()
+		if u.batteryEnabled {
+			u.batteryAlarmSelect.Enable()
+		}
 		u.settingsSetButton.Enable()
 		u.highRssiCalibrationEntry.Enable()
 		u.lowRssiCalibrationEntry.Enable()

@@ -17,5 +17,5 @@ func (s *Schema) GetBatteryVoltage() (float64, error) {
 		return 0.0, err
 	}
 
-	return raw.Payload["voltage"].(float64), nil
+	return raw.Payload["voltage"].(float64) / 10, nil
 }

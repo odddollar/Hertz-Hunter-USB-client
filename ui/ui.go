@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/data/validation"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -56,8 +57,9 @@ type Ui struct {
 	highRssiCalibration int
 	lowRssiCalibration  int
 
-	// Whether battery is available
+	// Stores battery state
 	batteryEnabled bool
+	batteryVoltage binding.Float
 
 	// Global schema object store
 	schema *schema.Schema
@@ -214,6 +216,9 @@ func (u *Ui) NewUI() {
 
 	// Disable settings elements as not connected
 	u.disableSettingsUi()
+
+	// Create battery voltage binding
+	u.batteryVoltage = binding.NewFloat()
 }
 
 // Show and run app

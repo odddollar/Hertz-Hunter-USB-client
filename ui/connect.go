@@ -3,6 +3,7 @@ package ui
 import (
 	"Hertz-Hunter-USB-Client/schema"
 	"errors"
+	"time"
 
 	"fyne.io/fyne/v2"
 )
@@ -44,7 +45,7 @@ func (u *Ui) connectUSBSerial() {
 
 	// Get battery enabled state and voltage
 	u.batteryEnabled = true
-	_, err = u.schema.GetBatteryVoltage()
+	voltage, err := u.schema.GetBatteryVoltage()
 	if err != nil {
 		if err.Error() == "'location' must be 'values', 'settings', 'calibration', or 'ping'" {
 			u.batteryEnabled = false
@@ -53,6 +54,17 @@ func (u *Ui) connectUSBSerial() {
 			return
 		}
 	}
+	u.batteryVoltage.Set(voltage)
+
+	go func() {
+		t := time.NewTicker(500 * time.Millisecond)
+		defer t.Stop()
+		count := 0.0
+		for range t.C {
+			u.batteryVoltage.Set(count)
+			count += 0.1
+		}
+	}()
 
 	// Set to high band
 	err = u.schema.SetBand(false)

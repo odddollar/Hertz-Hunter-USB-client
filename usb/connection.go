@@ -89,8 +89,9 @@ func (c *Connection) Communicate(msg SerialFrame) (SerialFrame, error) {
 	maxAttempts := 2
 
 	for i := range maxAttempts {
-		// Drain serial receive to start buffer fresh
+		// Drain serial to start buffer fresh
 		c.port.ResetInputBuffer()
+		c.port.ResetOutputBuffer()
 
 		// Send message
 		if err := c.send(msg); err != nil {

@@ -34,7 +34,7 @@ type Ui struct {
 	// Connection ui components
 	portsSelect                *widget.Select
 	portsRefreshButton         *widget.Button
-	baudrateSelect             *widget.Select
+	baudRateSelect             *widget.Select
 	graphRefreshIntervalSelect *widget.Select
 	connectButton              *widget.Button
 	disconnectButton           *widget.Button
@@ -104,8 +104,8 @@ func (u *Ui) NewUI() {
 	u.portsRefreshButton = widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), u.refreshPortsDisplay)
 
 	// Create baudrate entry
-	u.baudrateSelect = widget.NewSelect(intsToStrings(BAUDRATES), func(s string) {})
-	u.baudrateSelect.SetSelected(fmt.Sprint(DEFAULT_BAUDRATE))
+	u.baudRateSelect = widget.NewSelect(intsToStrings(BAUD_RATES), func(s string) {})
+	u.baudRateSelect.SetSelected(fmt.Sprint(DEFAULT_BAUD_RATE))
 
 	// Create refresh graph dropdown
 	u.graphRefreshIntervalSelect = widget.NewSelect(durationsToStrings(REFRESH_INTERVALS), func(s string) {})
@@ -129,7 +129,7 @@ func (u *Ui) NewUI() {
 				u.portsRefreshButton,
 				u.portsSelect,
 			)),
-			widget.NewFormItem("Baudrate", u.baudrateSelect),
+			widget.NewFormItem("Baud Rate", u.baudRateSelect),
 			widget.NewFormItem("Graph Refresh Interval", u.graphRefreshIntervalSelect),
 		),
 		u.connectButton,
@@ -233,7 +233,7 @@ func (u *Ui) disableConnectionUi() {
 	fyne.Do(func() {
 		u.portsSelect.Disable()
 		u.portsRefreshButton.Disable()
-		u.baudrateSelect.Disable()
+		u.baudRateSelect.Disable()
 		u.graphRefreshIntervalSelect.Disable()
 		u.connectButton.Disable()
 	})
@@ -244,7 +244,7 @@ func (u *Ui) enableConnectionUi() {
 	fyne.Do(func() {
 		u.portsSelect.Enable()
 		u.portsRefreshButton.Enable()
-		u.baudrateSelect.Enable()
+		u.baudRateSelect.Enable()
 		u.graphRefreshIntervalSelect.Enable()
 		u.connectButton.Enable()
 	})

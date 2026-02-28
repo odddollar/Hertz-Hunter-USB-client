@@ -22,7 +22,7 @@ func (u *Ui) connectUSBSerial() {
 	portName := u.portsSelect.Selected
 
 	// Get baud rate
-	baudRate := BAUDRATES[u.baudrateSelect.SelectedIndex()]
+	baudRate := BAUD_RATES[u.baudRateSelect.SelectedIndex()]
 
 	// Get poll rate
 	pollRate := REFRESH_INTERVALS[u.graphRefreshIntervalSelect.SelectedIndex()]

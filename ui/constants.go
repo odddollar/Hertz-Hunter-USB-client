@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	// Baudrates used in ui dropdown
-	BAUDRATES        = []int{9600, 19200, 38400, 57600, 115200}
-	DEFAULT_BAUDRATE = 115200
+	// Baud rates used in ui dropdown
+	BAUD_RATES        = []int{9600, 19200, 38400, 57600, 115200}
+	DEFAULT_BAUD_RATE = 115200
 
 	// Graph refresh intervals used in ui dropdown
 	REFRESH_INTERVALS        = []time.Duration{100 * time.Millisecond, 250 * time.Millisecond, 500 * time.Millisecond, 1 * time.Second}

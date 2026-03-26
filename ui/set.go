@@ -30,6 +30,7 @@ func (u *Ui) setCalibrationValues() {
 	// Set values
 	err := u.schema.SetCalibratedValues(low, high)
 	if err != nil {
+		u.updateCalibrationEntries()
 		u.showError(err)
 		return
 	}

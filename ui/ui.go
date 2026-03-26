@@ -50,6 +50,9 @@ type Ui struct {
 	lowRssiCalibrationEntry  *widget.Entry
 	calibrationSetButton     *widget.Button
 
+	// Stores config items
+	configAccordion *widget.Accordion
+
 	// Store band state
 	lowband bool
 
@@ -161,13 +164,19 @@ func (u *Ui) NewUI() {
 		`^(?:[0-9]|[1-9][0-9]{1,2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-5])$`,
 		"Must be integer between 0 and 4095 inclusive",
 	)
-	u.highRssiCalibrationEntry.OnChanged = func(s string) { u.validateCalibrationEntries() }
+	u.highRssiCalibrationEntry.OnChanged = func(s string) {
+		u.validateCalibrationEntries()
+		u.configAccordion.Refresh()
+	}
 	u.lowRssiCalibrationEntry = widget.NewEntry()
 	u.lowRssiCalibrationEntry.Validator = validation.NewRegexp(
 		`^(?:[0-9]|[1-9][0-9]{1,2}|[1-3][0-9]{3}|40[0-8][0-9]|409[0-5])$`,
 		"Must be integer between 0 and 4095 inclusive",
 	)
-	u.lowRssiCalibrationEntry.OnChanged = func(s string) { u.validateCalibrationEntries() }
+	u.lowRssiCalibrationEntry.OnChanged = func(s string) {
+		u.validateCalibrationEntries()
+		u.configAccordion.Refresh()
+	}
 
 	// Create set button for calibration
 	u.calibrationSetButton = widget.NewButton("Set", func() { go u.setCalibrationValues() })
@@ -183,13 +192,13 @@ func (u *Ui) NewUI() {
 	)
 
 	// Create accordion for configuration items
-	configAccordion := widget.NewAccordion(
+	u.configAccordion = widget.NewAccordion(
 		widget.NewAccordionItem("Connection", connectionContainer),
 		widget.NewAccordionItem("Settings", settingsContainer),
 		widget.NewAccordionItem("Calibration", calibrationContainer),
 	)
-	configAccordion.MultiOpen = true
-	configAccordion.Open(0)
+	u.configAccordion.MultiOpen = true
+	u.configAccordion.Open(0)
 
 	// Create window layout and set content
 	u.w.SetContent(container.NewBorder(
@@ -201,7 +210,7 @@ func (u *Ui) NewUI() {
 				u.aboutButton,
 				u.titleLabel,
 			),
-			configAccordion,
+			u.configAccordion,
 			u.switchBandButton,
 		),
 		container.NewVBox(

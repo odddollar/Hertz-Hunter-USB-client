@@ -7,6 +7,7 @@
 package usb
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -147,7 +148,7 @@ func (c *Connection) receive() (SerialFrame, error) {
 	}()
 
 	// Buffers for reading data from serial
-	buffer := []byte{}
+	var buffer bytes.Buffer
 	tmp := make([]byte, 1024)
 
 	readStarted := false
@@ -171,7 +172,7 @@ func (c *Connection) receive() (SerialFrame, error) {
 			if !readStarted {
 				if b == '{' {
 					readStarted = true
-					buffer = append(buffer, b)
+					buffer.WriteByte(b)
 				}
 				continue
 			}
@@ -179,8 +180,8 @@ func (c *Connection) receive() (SerialFrame, error) {
 			// Process full frame when newline received
 			if b == '\n' {
 				var msg SerialFrame
-				if err := json.Unmarshal(buffer, &msg); err != nil {
-					fmt.Println(string(buffer))
+				if err := json.Unmarshal(buffer.Bytes(), &msg); err != nil {
+					fmt.Println(buffer.String())
 					return SerialFrame{}, err
 				}
 				if msg.Event == "error" {
@@ -195,7 +196,7 @@ func (c *Connection) receive() (SerialFrame, error) {
 			}
 
 			// Accumulate bytes
-			buffer = append(buffer, b)
+			buffer.WriteByte(b)
 		}
 	}
 

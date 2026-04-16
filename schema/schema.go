@@ -21,8 +21,8 @@ type ValuesResult struct {
 }
 
 // Create new schema object
-func NewSchema(portName string, baud int) (*Schema, error) {
-	con, err := usb.NewConnection(portName, baud)
+func NewSchema(portName string, baud, maxRetries int) (*Schema, error) {
+	con, err := usb.NewConnection(portName, baud, maxRetries)
 	if err != nil {
 		return nil, err
 	}

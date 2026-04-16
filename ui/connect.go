@@ -24,12 +24,15 @@ func (u *Ui) connectUSBSerial() {
 	// Get baud rate
 	baudRate := BAUD_RATES[u.baudRateSelect.SelectedIndex()]
 
+	// Get max communication retries
+	maxCommunicationRetries := COMMUNICATION_RETRIES[u.maxComRetriesSelect.SelectedIndex()]
+
 	// Get poll rate
 	pollRate := REFRESH_INTERVALS[u.graphRefreshIntervalSelect.SelectedIndex()]
 
 	// Create new schema
 	var err error
-	u.schema, err = schema.NewSchema(portName, baudRate)
+	u.schema, err = schema.NewSchema(portName, baudRate, maxCommunicationRetries)
 	if err != nil {
 		u.enableConnectionUi()
 		u.showError(err)

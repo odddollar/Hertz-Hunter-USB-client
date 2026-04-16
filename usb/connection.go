@@ -28,13 +28,14 @@ type SerialFrame struct {
 
 // Handles messaging and connection lifetime
 type Connection struct {
-	port serial.Port
+	port       serial.Port
+	maxRetries int
 
 	mu sync.Mutex
 }
 
 // Create new connection object
-func NewConnection(portName string, baud int) (*Connection, error) {
+func NewConnection(portName string, baud, maxRetries int) (*Connection, error) {
 	// Setup baud and don't reset
 	mode := &serial.Mode{
 		BaudRate: baud,
@@ -57,7 +58,8 @@ func NewConnection(portName string, baud int) (*Connection, error) {
 
 	// Create connection object with port
 	connection := Connection{
-		port: port,
+		port:       port,
+		maxRetries: maxRetries,
 	}
 
 	// Check if connection succeeded
@@ -87,9 +89,8 @@ func (c *Connection) Communicate(msg SerialFrame) (SerialFrame, error) {
 	defer c.mu.Unlock()
 
 	var lastErr error
-	maxAttempts := 2
 
-	for i := range maxAttempts {
+	for i := range c.maxRetries {
 		// Drain serial to start buffer fresh
 		c.port.ResetInputBuffer()
 		c.port.ResetOutputBuffer()

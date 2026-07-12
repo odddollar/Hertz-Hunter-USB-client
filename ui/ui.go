@@ -155,9 +155,9 @@ func (u *Ui) NewUI() {
 	)
 
 	// Create selects for settings
-	u.scanIntervalSelect = widget.NewSelect([]string{"2.5MHz", "5MHz", "10MHz"}, func(s string) {})
-	u.buzzerSelect = widget.NewSelect([]string{"On", "Off"}, func(s string) {})
-	u.batteryAlarmSelect = widget.NewSelect([]string{"3.6v", "3.3v", "3.0v"}, func(s string) {})
+	u.scanIntervalSelect = widget.NewSelect(SCAN_INTERVALS, func(s string) {})
+	u.buzzerSelect = widget.NewSelect(BUZZER_STATES, func(s string) {})
+	u.batteryAlarmSelect = widget.NewSelect(BATTERY_ALARM_THRESHOLDS, func(s string) {})
 
 	// Create settings set button
 	u.settingsSetButton = widget.NewButton("Set", func() { go u.setSettingsIndices() })
@@ -215,19 +215,22 @@ func (u *Ui) NewUI() {
 	u.configAccordion.MultiOpen = true
 	u.configAccordion.Open(0)
 
-	// Create window layout and set content
-	u.w.SetContent(container.NewBorder(
-		container.NewVBox(
-			container.NewBorder(
-				nil,
-				nil,
-				widgets.NewSpacer(widget.NewButtonWithIcon("", theme.InfoIcon(), func() {}).MinSize()), // Keeps title centred
-				u.aboutButton,
-				u.titleLabel,
-			),
-			u.configAccordion,
-			u.switchBandButton,
+	// Create top elements group
+	topElementsGroup := container.NewVBox(
+		container.NewBorder(
+			nil,
+			nil,
+			widgets.NewSpacer(widget.NewButtonWithIcon("", theme.InfoIcon(), func() {}).MinSize()), // Keeps title centred
+			u.aboutButton,
+			u.titleLabel,
 		),
+		u.configAccordion,
+		u.switchBandButton,
+	)
+
+	// Create spectrum graph group
+	spectrumGraphGroup := container.NewBorder(
+		widgets.NewSpacer(fyne.NewSize(0, 4)),
 		container.NewVBox(
 			u.highbandFrequencyLabels,
 			u.lowbandFrequencyLabels,
@@ -235,6 +238,16 @@ func (u *Ui) NewUI() {
 		u.leftRssiLabels,
 		u.rightRssiLabels,
 		u.graphImage,
+	)
+
+	// Create window layout and set content
+	u.w.SetContent(container.NewBorder(
+		topElementsGroup,
+		nil, nil, nil,
+		container.NewAppTabs(
+			container.NewTabItem("Spectrum", spectrumGraphGroup),
+			container.NewTabItem("Waterfall", widget.NewLabel("Placeholder")),
+		),
 	))
 
 	// Initial refresh of available ports

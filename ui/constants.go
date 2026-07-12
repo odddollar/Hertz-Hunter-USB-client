@@ -17,6 +17,15 @@ var (
 	// Graph refresh intervals used in ui dropdown
 	REFRESH_INTERVALS        = []time.Duration{100 * time.Millisecond, 250 * time.Millisecond, 500 * time.Millisecond, 1 * time.Second}
 	DEFAULT_REFRESH_INTERVAL = 250 * time.Millisecond
+
+	// Scan intervals used in ui dropdown
+	SCAN_INTERVALS = []string{"2.5MHz", "5MHz", "10MHz"}
+
+	// Buzzer states used in ui dropdown
+	BUZZER_STATES = []string{"On", "Off"}
+
+	// Battery alarm thresholds used in ui dropdown
+	BATTERY_ALARM_THRESHOLDS = []string{"3.6v", "3.3v", "3.0v"}
 )
 
 // Dimensions for graph image

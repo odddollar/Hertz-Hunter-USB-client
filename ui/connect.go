@@ -90,14 +90,14 @@ func (u *Ui) connectUSBSerial() {
 	go func() {
 		for {
 			select {
-			case values, ok := <-valuesCh: // Update graph
+			case values, ok := <-valuesCh: // Update graphs
 				if !ok {
 					return
 				}
 
 				fyne.Do(func() {
-					// Update image with new values
-					u.graphImage.UpdateGraph(
+					// Update spectrum graph with new values
+					u.spectrumGraph.UpdateGraph(
 						values.Values,
 						u.lowRssiCalibration,
 						u.highRssiCalibration,

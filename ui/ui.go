@@ -21,14 +21,14 @@ type Ui struct {
 	w fyne.Window
 
 	// Main ui components
-	titleLabel              *canvas.Text
-	aboutButton             *widget.Button
-	switchBandButton        *widget.Button
-	graphImage              *widgets.RssiGraph
-	leftRssiLabels          *fyne.Container
-	rightRssiLabels         *fyne.Container
-	highbandFrequencyLabels *fyne.Container
-	lowbandFrequencyLabels  *fyne.Container
+	titleLabel                      *canvas.Text
+	aboutButton                     *widget.Button
+	switchBandButton                *widget.Button
+	spectrumGraph                   *widgets.RssiGraph
+	spectrumLeftRssiLabels          *fyne.Container
+	spectrumRightRssiLabels         *fyne.Container
+	spectrumHighbandFrequencyLabels *fyne.Container
+	spectrumLowbandFrequencyLabels  *fyne.Container
 
 	// Connection ui components
 	portsSelect                *widget.Select
@@ -88,19 +88,19 @@ func (u *Ui) NewUI() {
 	// Create switch band button
 	u.switchBandButton = widget.NewButton("Switch Band", u.switchBand)
 
-	// Create graph display area
-	u.graphImage = widgets.NewRssiGraph(GRAPH_WIDTH, GRAPH_HEIGHT)
+	// Create spectrum graph display area
+	u.spectrumGraph = widgets.NewRssiGraph(GRAPH_WIDTH, GRAPH_HEIGHT)
 
 	// Create rssi labels
-	u.leftRssiLabels = newRssiScale(fyne.TextAlignTrailing)
-	u.rightRssiLabels = newRssiScale(fyne.TextAlignLeading)
+	u.spectrumLeftRssiLabels = newRssiScale(fyne.TextAlignTrailing)
+	u.spectrumRightRssiLabels = newRssiScale(fyne.TextAlignLeading)
 
 	// Create highband labels
-	u.highbandFrequencyLabels = newFrequencyScale("5645MHz", "5795MHz", "5945MHz")
+	u.spectrumHighbandFrequencyLabels = newFrequencyScale("5645MHz", "5795MHz", "5945MHz")
 
 	// Create lowband labels
-	u.lowbandFrequencyLabels = newFrequencyScale("5345MHz", "5495MHz", "5645MHz")
-	u.lowbandFrequencyLabels.Hide()
+	u.spectrumLowbandFrequencyLabels = newFrequencyScale("5345MHz", "5495MHz", "5645MHz")
+	u.spectrumLowbandFrequencyLabels.Hide()
 
 	// Create port selection dropdown with serial ports
 	u.portsSelect = widget.NewSelect([]string{}, func(s string) {})
@@ -230,14 +230,20 @@ func (u *Ui) NewUI() {
 
 	// Create spectrum graph group
 	spectrumGraphGroup := container.NewBorder(
-		widgets.NewSpacer(fyne.NewSize(0, 4)),
+		widgets.NewSpacer(fyne.NewSize(0, 0)), // Funky spacing hack
 		container.NewVBox(
-			u.highbandFrequencyLabels,
-			u.lowbandFrequencyLabels,
+			u.spectrumHighbandFrequencyLabels,
+			u.spectrumLowbandFrequencyLabels,
 		),
-		u.leftRssiLabels,
-		u.rightRssiLabels,
-		u.graphImage,
+		u.spectrumLeftRssiLabels,
+		u.spectrumRightRssiLabels,
+		u.spectrumGraph,
+	)
+
+	// Create waterfall graph group
+	waterfallGraphGroup := container.NewBorder(
+		nil, nil, nil, nil,
+		widget.NewLabel("Placeholder"),
 	)
 
 	// Create window layout and set content
@@ -245,8 +251,8 @@ func (u *Ui) NewUI() {
 		topElementsGroup,
 		nil, nil, nil,
 		container.NewAppTabs(
-			container.NewTabItem("Spectrum", spectrumGraphGroup),
-			container.NewTabItem("Waterfall", widget.NewLabel("Placeholder")),
+			container.NewTabItemWithIcon("Spectrum", theme.StorageIcon(), spectrumGraphGroup),
+			container.NewTabItemWithIcon("Waterfall", theme.ColorChromaticIcon(), waterfallGraphGroup),
 		),
 	))
 
@@ -341,13 +347,13 @@ func (u *Ui) showDisconnectButton() {
 func (u *Ui) switchBandLabels(lowband bool) {
 	if lowband {
 		fyne.Do(func() {
-			u.highbandFrequencyLabels.Hide()
-			u.lowbandFrequencyLabels.Show()
+			u.spectrumHighbandFrequencyLabels.Hide()
+			u.spectrumLowbandFrequencyLabels.Show()
 		})
 	} else {
 		fyne.Do(func() {
-			u.highbandFrequencyLabels.Show()
-			u.lowbandFrequencyLabels.Hide()
+			u.spectrumHighbandFrequencyLabels.Show()
+			u.spectrumLowbandFrequencyLabels.Hide()
 		})
 	}
 }

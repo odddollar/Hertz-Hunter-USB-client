@@ -28,7 +28,7 @@ var (
 	BATTERY_ALARM_THRESHOLDS = []string{"3.6v", "3.3v", "3.0v"}
 )
 
-// Dimensions for graph image
+// Dimensions for graph images
 const (
 	GRAPH_WIDTH  = 998
 	GRAPH_HEIGHT = 600

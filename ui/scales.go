@@ -9,17 +9,17 @@ import (
 	"fyne.io/fyne/v2/theme"
 )
 
-// Create rssi scale with given text alignment
-func newRssiScale(alignment fyne.TextAlign) *fyne.Container {
-	full := canvas.NewText("100%", theme.Color(theme.ColorNameForeground))
+// Create scale with given text alignment
+func newSideScale(lowText, midText, highText string, alignment fyne.TextAlign) *fyne.Container {
+	full := canvas.NewText(highText, theme.Color(theme.ColorNameForeground))
 	full.Alignment = alignment
 	full.TextStyle.Bold = true
 
-	mid := canvas.NewText("50%", theme.Color(theme.ColorNameForeground))
+	mid := canvas.NewText(midText, theme.Color(theme.ColorNameForeground))
 	mid.Alignment = alignment
 	mid.TextStyle.Bold = true
 
-	none := canvas.NewText("0%", theme.Color(theme.ColorNameForeground))
+	none := canvas.NewText(lowText, theme.Color(theme.ColorNameForeground))
 	none.Alignment = alignment
 	none.TextStyle.Bold = true
 
@@ -33,21 +33,21 @@ func newRssiScale(alignment fyne.TextAlign) *fyne.Container {
 }
 
 // Create frequency scale with given text
-func newFrequencyScale(low, mid, high string) *fyne.Container {
+func newFrequencyScale(lowText, midText, highText, spacerText string) *fyne.Container {
 	// Alignment spacer
-	t := canvas.NewText("100%", theme.Color(theme.ColorNameForeground))
+	t := canvas.NewText(spacerText, theme.Color(theme.ColorNameForeground))
 	t.TextStyle.Bold = true
 	spacer := widgets.NewSpacer(t.MinSize())
 
-	left := canvas.NewText(low, theme.Color(theme.ColorNameForeground))
+	left := canvas.NewText(lowText, theme.Color(theme.ColorNameForeground))
 	left.Alignment = fyne.TextAlignLeading
 	left.TextStyle.Bold = true
 
-	middle := canvas.NewText(mid, theme.Color(theme.ColorNameForeground))
+	middle := canvas.NewText(midText, theme.Color(theme.ColorNameForeground))
 	middle.Alignment = fyne.TextAlignCenter
 	middle.TextStyle.Bold = true
 
-	right := canvas.NewText(high, theme.Color(theme.ColorNameForeground))
+	right := canvas.NewText(highText, theme.Color(theme.ColorNameForeground))
 	right.Alignment = fyne.TextAlignTrailing
 	right.TextStyle.Bold = true
 

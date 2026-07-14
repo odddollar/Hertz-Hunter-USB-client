@@ -9,6 +9,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// Duration of history displayed
+const waterfallWindow = 30 * time.Second
+
 // Single row of history captured at given moment
 type waterfallRow struct {
 	values    []int
@@ -47,6 +50,84 @@ func NewWaterfallGraph(graphWidth, graphHeight int) *WaterfallGraph {
 	// Extend base widget and return
 	graph.ExtendBaseWidget(graph)
 	return graph
+}
+
+// Adds newest sample to waterfall and redraws image
+func (w *WaterfallGraph) UpdateGraph(
+	numbers []int,
+	minCalibration, maxCalibration int,
+	minFrequency, maxFrequency int,
+) {
+	if len(numbers) == 0 {
+		return
+	}
+
+	// Append newest row, drawn along bottom edge as time passes
+	w.rows = append(w.rows, waterfallRow{
+		values:    numbers,
+		timestamp: time.Now(),
+	})
+
+	// Drop rows older than display window
+	cutoff := time.Now().Add(-waterfallWindow)
+	for len(w.rows) > 0 && w.rows[0].timestamp.Before(cutoff) {
+		w.rows = w.rows[1:]
+	}
+
+	// Create blank image
+	img := newEmptyImage(w.graphWidth, w.graphHeight, color.Black)
+
+	now := time.Now()
+
+	// Draw each row
+	for i, row := range w.rows {
+		// Top of row based on difference between current and row times
+		yTop := w.elapsedToY(now.Sub(row.timestamp))
+
+		// Bottom of row based on being last row or not
+		yBottom := w.graphHeight
+		if i+1 < len(w.rows) {
+			yBottom = w.elapsedToY(now.Sub(w.rows[i+1].timestamp))
+		}
+
+		// Ignore too narrow rows
+		if yBottom <= yTop {
+			continue
+		}
+
+		// Draw each bar in row
+		for x := range w.graphWidth {
+			// Convert x position to value bin
+			bin := x * len(row.values) / w.graphWidth
+			value := row.values[bin]
+
+			// Calculate rssi intensity
+			intensity := mapClamped(value, minCalibration, maxCalibration, 0, 255)
+			pixelColour := waterfallColour(intensity)
+
+			// Fill in pixels
+			for y := yTop; y < yBottom; y++ {
+				img.Set(x, y, pixelColour)
+			}
+		}
+	}
+
+	w.graphCanvas.Image = img
+	w.Refresh()
+}
+
+// Converts elapsed duration into vertical pixel position
+// Bottow edge is now
+func (w *WaterfallGraph) elapsedToY(elapsed time.Duration) int {
+	if elapsed < 0 {
+		elapsed = 0
+	}
+	if elapsed > waterfallWindow {
+		elapsed = waterfallWindow
+	}
+
+	pixelsFromBottom := int(elapsed) * w.graphHeight / int(waterfallWindow)
+	return w.graphHeight - pixelsFromBottom
 }
 
 // Returns new renderer for WaterfallGraph

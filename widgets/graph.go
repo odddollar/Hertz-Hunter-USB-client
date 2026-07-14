@@ -111,22 +111,13 @@ func (r *RssiGraph) UpdateGraph(
 
 	// Calculation values
 	barCount := len(numbers)
-	calibrationRange := maxCalibration - minCalibration
 
 	// Create blank image
 	img := newEmptyImage(r.graphWidth, r.graphHeight, color.Black)
 
 	for i, value := range numbers {
-		// Clamp value to range
-		if value < minCalibration {
-			value = minCalibration
-		}
-		if value > maxCalibration {
-			value = maxCalibration
-		}
-
-		// Height as percentage of calibration range
-		barHeight := (value - minCalibration) * r.graphHeight / calibrationRange
+		// Map value to bar height
+		barHeight := mapClamped(value, minCalibration, maxCalibration, 0, r.graphHeight)
 
 		// Dimensions and position of bar
 		x1 := i * r.graphWidth / barCount

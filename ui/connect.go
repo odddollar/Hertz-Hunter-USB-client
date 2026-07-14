@@ -105,6 +105,15 @@ func (u *Ui) connectUSBSerial() {
 						values.MaxFrequency,
 					)
 
+					// Update waterfall graph with new values
+					u.waterfallGraph.UpdateGraph(
+						values.Values,
+						u.lowRssiCalibration,
+						u.highRssiCalibration,
+						values.MinFrequency,
+						values.MaxFrequency,
+					)
+
 					// Automatically switch band labels
 					u.switchBandLabels(values.Lowband)
 

@@ -3,6 +3,8 @@ package widgets
 import (
 	"image"
 	"image/color"
+
+	"fyne.io/fyne/v2/theme"
 )
 
 // Generate empty image
@@ -28,4 +30,18 @@ func mapClamped(value, inMin, inMax, outMin, outMax int) int {
 		value = inMax
 	}
 	return outMin + (value-inMin)*(outMax-outMin)/(inMax-inMin)
+}
+
+// Convert rssi intensity to colour from gradient
+func waterfallColour(intensity int) color.Color {
+	// Get primary colour
+	r, g, b, _ := theme.Color(theme.ColorNamePrimary).RGBA()
+
+	// Calculation intensity position on colour gradient
+	return color.RGBA{
+		R: uint8((r * uint32(intensity)) / (255 * 257)),
+		G: uint8((g * uint32(intensity)) / (255 * 257)),
+		B: uint8((b * uint32(intensity)) / (255 * 257)),
+		A: 255,
+	}
 }

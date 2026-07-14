@@ -4,7 +4,7 @@ import (
 	"Hertz-Hunter-USB-client/usb"
 )
 
-// Get calibrated values
+// Get battery voltage
 func (s *Schema) GetBatteryVoltage() (float64, error) {
 	frame := usb.SerialFrame{
 		Event:    "get",

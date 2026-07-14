@@ -1,6 +1,6 @@
 # Hertz Hunter USB Client
 
-A USB client for the [Hertz Hunter](https://github.com/odddollar/Hertz-Hunter) spectrum analyser. Uses Hertz Hunter's USB serial communication feature to request data from the device and displays it visually on a computer. This program provides almost full control over a connected Hertz Hunter device through a desktop app interface.
+A desktop client for the [Hertz Hunter](https://github.com/odddollar/Hertz-Hunter) spectrum analyser. Uses Hertz Hunter's USB serial communication feature to request data from the device and displays it visually on a computer. This program provides almost full control over a connected Hertz Hunter device through a desktop app interface.
 
 For further information on the capabilities of the Hertz Hunter project, please see the [main repository](https://github.com/odddollar/Hertz-Hunter). The USB serial documentation and schema can be found [here](https://github.com/odddollar/Hertz-Hunter/blob/master/USB.md).
 

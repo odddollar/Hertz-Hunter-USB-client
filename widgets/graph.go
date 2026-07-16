@@ -172,8 +172,7 @@ func (r *RssiGraph) updateTooltip(localPos fyne.Position) {
 	rssiStrength := mapClamped(rssi, r.minCalibration, r.maxCalibration, 0, 100)
 
 	// Format tooltip text
-	tooltipText := fmt.Sprintf("%dMHz, %d%%", frequency, rssiStrength)
-	r.tooltipText.Text = tooltipText
+	r.tooltipText.Text = fmt.Sprintf("%dMHz, %d%%", frequency, rssiStrength)
 
 	// Get proper tooltip sizing
 	padding := float32(6)

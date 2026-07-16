@@ -1,6 +1,7 @@
 package widgets
 
 import (
+	"fmt"
 	"image/color"
 	"time"
 
@@ -178,8 +179,106 @@ func (w *WaterfallGraph) UpdateGraph(
 }
 
 // Updates tooltip position and text
+// TODO: Fix reliance on time.Now() as y position breaks
+// when tooltip updating by graph not
 func (w *WaterfallGraph) updateTooltip(localPos fyne.Position) {
+	// Get drawn graph dimensions
+	drawSize := w.graphCanvas.Size()
+	if drawSize.Width <= 0 || drawSize.Height <= 0 {
+		return
+	}
 
+	// Need at least one row of history to look up
+	if len(w.rows) == 0 {
+		return
+	}
+
+	// Scale mouse y position into graph height space used by elapsedToY
+	displayHeight := int(drawSize.Height)
+	mouseY := int(localPos.Y)
+	if mouseY == displayHeight {
+		mouseY--
+	}
+	scaledY := (mouseY * w.graphHeight) / displayHeight
+
+	// Find row drawn at this vertical position
+	// Search newest to oldest (end of array to beginning)
+	now := time.Now()
+	var hoveredRow *waterfallRow
+	for i := len(w.rows) - 1; i >= 0; i-- {
+		// Calculate bounds of current row
+		yTop := w.elapsedToY(now.Sub(w.rows[i].timestamp))
+		yBottom := w.graphHeight
+		if i+1 < len(w.rows) {
+			yBottom = w.elapsedToY(now.Sub(w.rows[i+1].timestamp))
+		}
+
+		// Check scaled mouse y inside current row bounds
+		if scaledY >= yTop && scaledY < yBottom {
+			hoveredRow = &w.rows[i]
+			break
+		}
+	}
+	if hoveredRow == nil {
+		return
+	}
+
+	// Calculate number of bars over from 0
+	// Use hovered row's own length to prevent out of bounds
+	barCount := len(hoveredRow.values)
+	if barCount < 2 {
+		return
+	}
+	displayWidth := int(drawSize.Width)
+	mouseX := int(localPos.X)
+	if mouseX == displayWidth {
+		mouseX--
+	}
+	barsOver := (mouseX * barCount) / displayWidth
+
+	// Calculate frequency with integer rounding
+	freqRange := w.maxFrequency - w.minFrequency
+	denom := barCount - 1
+	num := barsOver * freqRange
+	frequency := (num+denom/2)/denom + w.minFrequency
+
+	// Calculate signal strength and time since row captured
+	rssi := hoveredRow.values[barsOver]
+	rssiStrength := mapClamped(rssi, w.minCalibration, w.maxCalibration, 0, 100)
+	elapsedSeconds := int(now.Sub(hoveredRow.timestamp).Round(time.Second).Seconds())
+
+	// Format tooltip text
+	w.tooltipText.Text = fmt.Sprintf("%dMHz, %ds ago, %d%%", frequency, elapsedSeconds, rssiStrength)
+
+	// Get proper tooltip sizing
+	padding := float32(6)
+	offset := float32(12)
+	textSize := w.tooltipText.MinSize()
+	bgSize := fyne.NewSize(textSize.Width+padding*2, textSize.Height+padding*2)
+
+	// Put tooltip in bottom right corner of cursor
+	tx := localPos.X + offset
+	ty := localPos.Y + offset
+
+	// Flip position horizontally
+	if tx+bgSize.Width > w.Size().Width {
+		tx = localPos.X - bgSize.Width
+	}
+
+	// Flip position vertically
+	if ty+bgSize.Height > w.Size().Height {
+		ty = localPos.Y - bgSize.Height
+	}
+
+	// Move tooltip
+	w.tooltipBg.Move(fyne.NewPos(tx, ty))
+	w.tooltipBg.Resize(bgSize)
+	w.tooltipText.Move(fyne.NewPos(tx+padding, ty+padding))
+
+	// Show tooltip
+	w.tooltipBg.Show()
+	w.tooltipText.Show()
+	w.Refresh()
 }
 
 // Converts elapsed duration into vertical pixel position
@@ -219,12 +318,16 @@ func (r *waterfallGraphRenderer) Layout(size fyne.Size) {
 // Refreshes WaterfallGraph
 func (r *waterfallGraphRenderer) Refresh() {
 	r.waterfallGraph.graphCanvas.Refresh()
+	r.waterfallGraph.tooltipBg.Refresh()
+	r.waterfallGraph.tooltipText.Refresh()
 }
 
 // Returns child widgets of WaterfallGraph
 func (r *waterfallGraphRenderer) Objects() []fyne.CanvasObject {
 	return []fyne.CanvasObject{
 		r.waterfallGraph.graphCanvas,
+		r.waterfallGraph.tooltipBg,
+		r.waterfallGraph.tooltipText,
 	}
 }
 

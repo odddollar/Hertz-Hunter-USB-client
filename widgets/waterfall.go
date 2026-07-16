@@ -6,6 +6,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -22,15 +23,27 @@ type waterfallRow struct {
 type WaterfallGraph struct {
 	widget.BaseWidget
 
+	// Rows of history, oldest first, used for drawing and tooltip lookup
+	rows []waterfallRow
+
 	// Ui elements
 	graphCanvas *canvas.Image
+	tooltipBg   *canvas.Rectangle
+	tooltipText *canvas.Text
 
 	// Constants
 	graphWidth  int
 	graphHeight int
 
-	// Rows of history, oldest first, used for drawing and tooltip lookup
-	rows []waterfallRow
+	// Calculate tooltip data
+	minCalibration int
+	maxCalibration int
+	minFrequency   int
+	maxFrequency   int
+
+	// Update tooltip position
+	lastMousePos fyne.Position
+	mouseIn      bool
 }
 
 // Creates new WaterfallGraph widget
@@ -40,16 +53,52 @@ func NewWaterfallGraph(graphWidth, graphHeight int) *WaterfallGraph {
 	graphCanvas.FillMode = canvas.ImageFillStretch
 	graphCanvas.ScaleMode = canvas.ImageScalePixels
 
+	// Create background
+	tooltipBg := canvas.NewRectangle(color.RGBA{R: 32, G: 32, B: 36, A: 235})
+
+	// Create text
+	tooltipText := canvas.NewText("", color.White)
+	tooltipText.TextSize = 13
+
+	// Hide tooltip by default
+	tooltipBg.Hide()
+	tooltipText.Hide()
+
 	// Create new object
 	graph := &WaterfallGraph{
-		graphCanvas: graphCanvas,
-		graphWidth:  graphWidth,
-		graphHeight: graphHeight,
+		graphCanvas:    graphCanvas,
+		tooltipBg:      tooltipBg,
+		tooltipText:    tooltipText,
+		graphWidth:     graphWidth,
+		graphHeight:    graphHeight,
+		minCalibration: 0,
+		maxCalibration: 4096,
 	}
 
 	// Extend base widget and return
 	graph.ExtendBaseWidget(graph)
 	return graph
+}
+
+// Updates tooltip when mouse enters widget
+func (w *WaterfallGraph) MouseIn(event *desktop.MouseEvent) {
+	w.mouseIn = true
+	w.lastMousePos = event.Position
+	w.updateTooltip(event.Position)
+}
+
+// Updates tooltip when mouse moves over widget
+func (w *WaterfallGraph) MouseMoved(event *desktop.MouseEvent) {
+	w.lastMousePos = event.Position
+	w.updateTooltip(event.Position)
+}
+
+// Hides tooltip when mouse leaves widget
+func (w *WaterfallGraph) MouseOut() {
+	w.mouseIn = false
+	w.tooltipBg.Hide()
+	w.tooltipText.Hide()
+	w.Refresh()
 }
 
 // Adds newest sample to waterfall and redraws image
@@ -61,6 +110,13 @@ func (w *WaterfallGraph) UpdateGraph(
 	if len(numbers) == 0 {
 		return
 	}
+
+	// Used for calculating tooltip text
+	// Updated every time data polled from device
+	w.minCalibration = minCalibration
+	w.maxCalibration = maxCalibration
+	w.minFrequency = minFrequency
+	w.maxFrequency = maxFrequency
 
 	// Append newest row, drawn along bottom edge as time passes
 	w.rows = append(w.rows, waterfallRow{
@@ -114,6 +170,16 @@ func (w *WaterfallGraph) UpdateGraph(
 
 	w.graphCanvas.Image = img
 	w.Refresh()
+
+	// Update tooltip if mouse still inside
+	if w.mouseIn {
+		w.updateTooltip(w.lastMousePos)
+	}
+}
+
+// Updates tooltip position and text
+func (w *WaterfallGraph) updateTooltip(localPos fyne.Position) {
+
 }
 
 // Converts elapsed duration into vertical pixel position

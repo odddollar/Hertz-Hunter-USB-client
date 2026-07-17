@@ -34,14 +34,27 @@ func mapClamped(value, inMin, inMax, outMin, outMax int) int {
 
 // Convert rssi intensity to colour from gradient
 func waterfallColour(intensity int) color.Color {
-	// Get primary colour
-	r, g, b, _ := theme.Color(theme.ColorNamePrimary).RGBA()
+	// Get primary and error theme colours
+	pr, pg, pb, _ := theme.Color(theme.ColorNamePrimary).RGBA()
+	er, eg, eb, _ := theme.Color(theme.ColorNameError).RGBA()
 
-	// Calculation intensity position on colour gradient
+	// Interpolate from black to primary
+	if intensity <= 128 {
+		t := uint32(intensity)
+		return color.RGBA{
+			R: uint8((pr * t) / (128 * 257)),
+			G: uint8((pg * t) / (128 * 257)),
+			B: uint8((pb * t) / (128 * 257)),
+			A: 255,
+		}
+	}
+
+	// Interpolate from primary to error
+	t := uint32(intensity - 128)
 	return color.RGBA{
-		R: uint8((r * uint32(intensity)) / (255 * 257)),
-		G: uint8((g * uint32(intensity)) / (255 * 257)),
-		B: uint8((b * uint32(intensity)) / (255 * 257)),
+		R: uint8(pr + (er-pr)*t/(127*257)),
+		G: uint8(pg + (eg-pg)*t/(127*257)),
+		B: uint8(pb + (eb-pb)*t/(127*257)),
 		A: 255,
 	}
 }

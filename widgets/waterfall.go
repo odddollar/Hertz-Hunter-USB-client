@@ -13,6 +13,7 @@ import (
 
 // Duration of history displayed
 const waterfallWindow = 30 * time.Second
+const waterfallWindowBuffer = 2 * time.Second
 
 // Single row of history captured at given moment
 type waterfallRow struct {
@@ -126,7 +127,7 @@ func (w *WaterfallGraph) UpdateGraph(
 	})
 
 	// Drop rows older than display window
-	cutoff := time.Now().Add(-waterfallWindow)
+	cutoff := time.Now().Add(-waterfallWindow).Add(-waterfallWindowBuffer)
 	for len(w.rows) > 0 && w.rows[0].timestamp.Before(cutoff) {
 		w.rows = w.rows[1:]
 	}

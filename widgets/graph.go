@@ -56,13 +56,11 @@ func NewRssiGraph(graphWidth, graphHeight int) *RssiGraph {
 
 	// Create new object
 	graph := &RssiGraph{
-		graphCanvas:    graphCanvas,
-		tooltipBg:      tooltipBg,
-		tooltipText:    tooltipText,
-		graphWidth:     graphWidth,
-		graphHeight:    graphHeight,
-		minCalibration: 0,
-		maxCalibration: 4096,
+		graphCanvas: graphCanvas,
+		tooltipBg:   tooltipBg,
+		tooltipText: tooltipText,
+		graphWidth:  graphWidth,
+		graphHeight: graphHeight,
 	}
 
 	// Extend base widget and return
@@ -88,6 +86,22 @@ func (r *RssiGraph) MouseOut() {
 	r.mouseIn = false
 	r.tooltipBg.Hide()
 	r.tooltipText.Hide()
+	r.Refresh()
+}
+
+// Reset clears the graph display and any stored data
+func (r *RssiGraph) Reset() {
+	// Clear stored data
+	r.rssiValues = nil
+
+	// Hide tooltip
+	r.tooltipBg.Hide()
+	r.tooltipText.Hide()
+
+	// Draw blank black canvas
+	img := newEmptyImage(r.graphWidth, r.graphHeight, color.Black)
+	r.graphCanvas.Image = img
+
 	r.Refresh()
 }
 

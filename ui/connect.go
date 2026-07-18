@@ -84,6 +84,10 @@ func (u *Ui) connectUSBSerial() {
 	// Update entries with calibration values
 	u.updateCalibrationEntries()
 
+	// Reset and clear graphs
+	u.spectrumGraph.Reset()
+	u.waterfallGraph.Reset()
+
 	// Start polling for values
 	valuesCh, errCh := u.schema.StartPollValues(pollRate, u.batteryEnabled)
 

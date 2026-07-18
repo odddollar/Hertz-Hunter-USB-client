@@ -68,13 +68,11 @@ func NewWaterfallGraph(graphWidth, graphHeight int) *WaterfallGraph {
 
 	// Create new object
 	graph := &WaterfallGraph{
-		graphCanvas:    graphCanvas,
-		tooltipBg:      tooltipBg,
-		tooltipText:    tooltipText,
-		graphWidth:     graphWidth,
-		graphHeight:    graphHeight,
-		minCalibration: 0,
-		maxCalibration: 4096,
+		graphCanvas: graphCanvas,
+		tooltipBg:   tooltipBg,
+		tooltipText: tooltipText,
+		graphWidth:  graphWidth,
+		graphHeight: graphHeight,
 	}
 
 	// Extend base widget and return
@@ -100,6 +98,22 @@ func (w *WaterfallGraph) MouseOut() {
 	w.mouseIn = false
 	w.tooltipBg.Hide()
 	w.tooltipText.Hide()
+	w.Refresh()
+}
+
+// Reset clears the graph display and any stored data
+func (w *WaterfallGraph) Reset() {
+	// Clear stored rows
+	w.rows = nil
+
+	// Hide tooltip
+	w.tooltipBg.Hide()
+	w.tooltipText.Hide()
+
+	// Draw blank black canvas
+	img := newEmptyImage(w.graphWidth, w.graphHeight, color.Black)
+	w.graphCanvas.Image = img
+
 	w.Refresh()
 }
 

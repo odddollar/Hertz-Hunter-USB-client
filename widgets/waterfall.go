@@ -44,8 +44,9 @@ type WaterfallGraph struct {
 	maxFrequency   int
 
 	// Update tooltip position
-	lastMousePos fyne.Position
-	mouseIn      bool
+	lastMousePos   fyne.Position
+	mouseIn        bool
+	lastUpdateTime time.Time
 }
 
 // Creates new WaterfallGraph widget
@@ -150,6 +151,7 @@ func (w *WaterfallGraph) UpdateGraph(
 	img := newEmptyImage(w.graphWidth, w.graphHeight, color.Black)
 
 	now := time.Now()
+	w.lastUpdateTime = now
 
 	// Draw each row
 	for i, row := range w.rows {
@@ -194,8 +196,6 @@ func (w *WaterfallGraph) UpdateGraph(
 }
 
 // Updates tooltip position and text
-// TODO: Fix reliance on time.Now() as y position breaks
-// when tooltip updating by graph not
 func (w *WaterfallGraph) updateTooltip(localPos fyne.Position) {
 	// Get drawn graph dimensions
 	drawSize := w.graphCanvas.Size()
@@ -208,6 +208,9 @@ func (w *WaterfallGraph) updateTooltip(localPos fyne.Position) {
 		return
 	}
 
+	// Keep tooltip positions consistent when disconnected
+	now := w.lastUpdateTime
+
 	// Scale mouse y position into graph height space used by elapsedToY
 	displayHeight := int(drawSize.Height)
 	mouseY := int(localPos.Y)
@@ -218,7 +221,6 @@ func (w *WaterfallGraph) updateTooltip(localPos fyne.Position) {
 
 	// Find row drawn at this vertical position
 	// Search newest to oldest (end of array to beginning)
-	now := time.Now()
 	var hoveredRow *waterfallRow
 	for i := len(w.rows) - 1; i >= 0; i-- {
 		// Calculate bounds of current row

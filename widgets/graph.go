@@ -165,7 +165,9 @@ func (r *RssiGraph) updateTooltip(localPos fyne.Position) {
 
 	// Calculate number of bars over from 0
 	barCount := len(r.rssiValues)
-	if barCount < 2 {
+	if barCount == 0 {
+		showTooltip("No data", r.lastMousePos, r.tooltipText, r.tooltipBg, r.Size())
+		r.Refresh()
 		return
 	}
 	displayWidth := int(drawSize.Width)
@@ -185,37 +187,14 @@ func (r *RssiGraph) updateTooltip(localPos fyne.Position) {
 	rssi := r.rssiValues[barsOver]
 	rssiStrength := mapClamped(rssi, r.minCalibration, r.maxCalibration, 0, 100)
 
-	// Format tooltip text
-	r.tooltipText.Text = fmt.Sprintf("%dMHz, %d%%", frequency, rssiStrength)
-
-	// Get proper tooltip sizing
-	padding := float32(6)
-	offset := float32(12)
-	textSize := r.tooltipText.MinSize()
-	bgSize := fyne.NewSize(textSize.Width+padding*2, textSize.Height+padding*2)
-
-	// Put tooltip in bottom right corner of cursor
-	tx := localPos.X + offset
-	ty := localPos.Y + offset
-
-	// Flip position horizontally
-	if tx+bgSize.Width > r.Size().Width {
-		tx = localPos.X - bgSize.Width
-	}
-
-	// Flip position vertically
-	if ty+bgSize.Height > r.Size().Height {
-		ty = localPos.Y - bgSize.Height
-	}
-
-	// Move tooltip
-	r.tooltipBg.Move(fyne.NewPos(tx, ty))
-	r.tooltipBg.Resize(bgSize)
-	r.tooltipText.Move(fyne.NewPos(tx+padding, ty+padding))
-
-	// Show tooltip
-	r.tooltipBg.Show()
-	r.tooltipText.Show()
+	// Format tooltip text and show
+	showTooltip(
+		fmt.Sprintf("%dMHz, %d%%", frequency, rssiStrength),
+		localPos,
+		r.tooltipText,
+		r.tooltipBg,
+		r.Size(),
+	)
 	r.Refresh()
 }
 

@@ -205,6 +205,8 @@ func (w *WaterfallGraph) updateTooltip(localPos fyne.Position) {
 
 	// Need at least one row of history to look up
 	if len(w.rows) == 0 {
+		showTooltip("No data", w.lastMousePos, w.tooltipText, w.tooltipBg, w.Size())
+		w.Refresh()
 		return
 	}
 
@@ -264,37 +266,14 @@ func (w *WaterfallGraph) updateTooltip(localPos fyne.Position) {
 	rssiStrength := mapClamped(rssi, w.minCalibration, w.maxCalibration, 0, 100)
 	elapsedSeconds := int(now.Sub(hoveredRow.timestamp).Round(time.Second).Seconds())
 
-	// Format tooltip text
-	w.tooltipText.Text = fmt.Sprintf("%dMHz, %ds ago, %d%%", frequency, elapsedSeconds, rssiStrength)
-
-	// Get proper tooltip sizing
-	padding := float32(6)
-	offset := float32(12)
-	textSize := w.tooltipText.MinSize()
-	bgSize := fyne.NewSize(textSize.Width+padding*2, textSize.Height+padding*2)
-
-	// Put tooltip in bottom right corner of cursor
-	tx := localPos.X + offset
-	ty := localPos.Y + offset
-
-	// Flip position horizontally
-	if tx+bgSize.Width > w.Size().Width {
-		tx = localPos.X - bgSize.Width
-	}
-
-	// Flip position vertically
-	if ty+bgSize.Height > w.Size().Height {
-		ty = localPos.Y - bgSize.Height
-	}
-
-	// Move tooltip
-	w.tooltipBg.Move(fyne.NewPos(tx, ty))
-	w.tooltipBg.Resize(bgSize)
-	w.tooltipText.Move(fyne.NewPos(tx+padding, ty+padding))
-
-	// Show tooltip
-	w.tooltipBg.Show()
-	w.tooltipText.Show()
+	// Format tooltip text and show
+	showTooltip(
+		fmt.Sprintf("%dMHz, %ds ago, %d%%", frequency, elapsedSeconds, rssiStrength),
+		localPos,
+		w.tooltipText,
+		w.tooltipBg,
+		w.Size(),
+	)
 	w.Refresh()
 }
 

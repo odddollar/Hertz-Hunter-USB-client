@@ -4,6 +4,8 @@ import (
 	"image"
 	"image/color"
 
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/theme"
 )
 
@@ -30,6 +32,47 @@ func mapClamped(value, inMin, inMax, outMin, outMax int) int {
 		value = inMax
 	}
 	return outMin + (value-inMin)*(outMax-outMin)/(inMax-inMin)
+}
+
+// Show tooltip with given text at mouse position inside parent widget
+func showTooltip(
+	text string,
+	localPos fyne.Position,
+	textWidget *canvas.Text,
+	bg *canvas.Rectangle,
+	parentSize fyne.Size,
+) {
+	// Set tooltip text and calculate sizing
+	textWidget.Text = text
+
+	// Get proper tooltip sizing
+	padding := float32(6)
+	offset := float32(12)
+	textSize := textWidget.MinSize()
+	bgSize := fyne.NewSize(textSize.Width+padding*2, textSize.Height+padding*2)
+
+	// Put tooltip in bottom right corner of cursor
+	tx := localPos.X + offset
+	ty := localPos.Y + offset
+
+	// Flip position horizontally
+	if tx+bgSize.Width > parentSize.Width {
+		tx = localPos.X - bgSize.Width
+	}
+
+	// Flip position vertically
+	if ty+bgSize.Height > parentSize.Height {
+		ty = localPos.Y - bgSize.Height
+	}
+
+	// Move tooltip
+	bg.Move(fyne.NewPos(tx, ty))
+	bg.Resize(bgSize)
+	textWidget.Move(fyne.NewPos(tx+padding, ty+padding))
+
+	// Show tooltip
+	bg.Show()
+	textWidget.Show()
 }
 
 // Convert rssi intensity to colour from gradient

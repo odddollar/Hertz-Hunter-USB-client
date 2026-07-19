@@ -239,6 +239,8 @@ func (w *WaterfallGraph) updateTooltip(localPos fyne.Position) {
 		}
 	}
 	if hoveredRow == nil {
+		showTooltip("No data", localPos, w.tooltipText, w.tooltipBg, w.Size())
+		w.Refresh()
 		return
 	}
 

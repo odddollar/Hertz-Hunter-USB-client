@@ -3,7 +3,7 @@ Icon = "Icon.png"
 Name = "Hertz Hunter USB Client"
 ID = "com.hertz-hunter-usb-client.odddollar"
 Version = "1.2.0"
-Build = 23
+Build = 24
 
 [Migrations]
 fyneDo = true

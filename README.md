@@ -10,9 +10,11 @@ For further information on the capabilities of the Hertz Hunter project, please 
 - Robust communication protocol to minimise disconnection errors
   - Selectable number of retries for sending/receiving serial data before returning an error
   - Logging of any serial errors that do occur 
-- Interactive graphing of RSSI data
-  - Mouse over the graph to show a tooltip with the hovered frequency and its live signal strength
-- Configurable interval to poll data from the device to update the graph
+- Multiple interactive graphs of RSSI data
+  - Histogram of the current spectrum
+  - Waterfall spectrogram showing the previous 30 seconds of data
+  - Mouse over the graphs to show a tooltip with the hovered frequency and its signal strength
+- Configurable interval to poll data from the device to update the graphs
 - Battery voltage continuously displayed in the about window
 - Automatic recognition if the connected device doesn't have battery monitoring setup
 - Ability to change and set all settings
@@ -20,7 +22,7 @@ For further information on the capabilities of the Hertz Hunter project, please 
 - Manually set exact high and low RSSI calibration values
   - Refer to [here](https://github.com/odddollar/Hertz-Hunter/blob/master/USAGE.md#rssi-calibration) and [here](https://github.com/odddollar/Hertz-Hunter/blob/master/USB.md#eventgetlocationcalibration) for explanations of Hertz Hunter's RSSI calibration system
 - Switch scanning between high and low bands
-- Collapsible UI elements to maximise display area for the RSSI graph
+- Collapsible UI elements to maximise display area for the RSSI graphs
 
 ## Connecting
 
@@ -73,5 +75,7 @@ upx --ultra-brute "Hertz Hunter USB Client.exe"
 <div align="center">
     <img src="./screenshots/Disconnected.png" alt="Disconnected"><br><br>
     <img src="./screenshots/Graph.png" alt="Graph"><br><br>
+    <img src="./screenshots/Waterfall.png" alt="Graph"><br><br>
     <img src="./screenshots/Settings.png" alt="Settings">
 </div>
+
